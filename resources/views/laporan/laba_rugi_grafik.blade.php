@@ -34,6 +34,16 @@
     </div>
 </form>
 
+<div class="mb-3">
+    <a href="{{ route('laporan.laba-rugi.pdf', [
+        'tanggal_awal' => $awal,
+        'tanggal_akhir' => $akhir
+    ]) }}"
+    class="btn btn-danger">
+        📄 Export PDF
+    </a>
+</div>
+
     <table class="table table-bordered">
         <thead class="table-dark">
             <tr>

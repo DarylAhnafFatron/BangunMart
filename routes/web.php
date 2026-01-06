@@ -159,11 +159,14 @@ Route::middleware('admin')->group(function () {
     Route::get('/pembelian/delete/{id}', [PembelianController::class, 'destroy']);
 
 
-    Route::get('/laporan/laba-rugi', [LaporanController::class, 'labaRugi']);
-    Route::get('/laporan/laba-rugi/pdf', [LaporanController::class, 'labaRugiPdf']);
-    Route::get('/laporan/laba-rugi/grafik', [LaporanController::class, 'labaRugiGrafik']);
+    Route::get('/laporan/laba-rugi', [LaporanController::class, 'labaRugi'])
+    ->name('laporan.laba-rugi');
 
+Route::get('/laporan/laba-rugi/pdf', [LaporanController::class, 'labaRugiPdf'])
+    ->name('laporan.laba-rugi.pdf');
 
+Route::get('/laporan/laba-rugi/grafik', [LaporanController::class, 'labaRugiGrafik'])
+    ->name('laporan.laba-rugi.grafik');
 
 
 });

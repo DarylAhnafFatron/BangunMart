@@ -237,24 +237,54 @@ public function labaRugi(Request $r)
 
 
 
-public function labaRugiPdf()
+public function labaRugiPdf(Request $r)
 {
-    $jual = DB::selectOne("
+    $awal  = $r->tanggal_awal;
+    $akhir = $r->tanggal_akhir;
+
+    // TOTAL PENJUALAN
+    $queryJual = "
         SELECT SUM(d.qty * d.harga_satuan) AS total
         FROM penjualan p
         JOIN detail_penjualan d ON p.id_nota = d.id_nota
         WHERE p.status_nota = 'dibayar'
-    ");
+    ";
 
-    $beli = DB::selectOne("
-        SELECT SUM(subtotal) AS total
-        FROM detail_pembelian
-    ");
+    $paramJual = [];
+
+    if ($awal && $akhir) {
+        $queryJual .= " AND DATE(p.tgl_nota) BETWEEN ? AND ? ";
+        $paramJual = [$awal, $akhir];
+    }
+
+    $jual = DB::selectOne($queryJual, $paramJual);
+
+    // TOTAL PEMBELIAN
+    $queryBeli = "
+        SELECT SUM(dp.qty * dp.harga_beli) AS total
+        FROM pembelian pb
+        JOIN detail_pembelian dp ON pb.id_pembelian = dp.id_pembelian
+    ";
+
+    $paramBeli = [];
+
+    if ($awal && $akhir) {
+        $queryBeli .= " WHERE DATE(pb.tgl_pembelian) BETWEEN ? AND ? ";
+        $paramBeli = [$awal, $akhir];
+    }
+
+    $beli = DB::selectOne($queryBeli, $paramBeli);
+
+    $totalJual = $jual->total ?? 0;
+    $totalBeli = $beli->total ?? 0;
+    $laba      = $totalJual - $totalBeli;
 
     $pdf = Pdf::loadView('laporan.laba_rugi_pdf', [
-        'jual' => $jual->total ?? 0,
-        'beli' => $beli->total ?? 0,
-        'laba' => ($jual->total ?? 0) - ($beli->total ?? 0)
+        'jual'  => $totalJual,
+        'beli'  => $totalBeli,
+        'laba'  => $laba,
+        'awal'  => $awal,
+        'akhir' => $akhir
     ]);
 
     return $pdf->download('laporan-laba-rugi.pdf');
